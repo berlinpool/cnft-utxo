@@ -38,7 +38,7 @@ RUN mkdir -p /etc/nix &&\
     echo "trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=" >> /etc/nix/nix.conf
 
 RUN mkdir -p /tmp/nft
-# # TODO: Create separate git repo for NFT creator
+# Copy over nft repo to build binaries 
 COPY . /tmp/nft/
 
 RUN git clone https://github.com/input-output-hk/plutus-apps.git /tmp/plutus-apps/
