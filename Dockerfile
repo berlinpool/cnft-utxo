@@ -98,8 +98,9 @@ ENV TOKENNAME=${INPUTS_DIR}/tokenname
 ENV ADDR_FILE=${INPUTS_DIR}/payment.addr
 ENV SKEY_FILE=${INPUTS_DIR}/payment.skey
 
-# Copy necessary scripts
-COPY --from=build ./mint-token-cli.sh ${SCRIPT_PATH}/mint-token-cli.sh
+# Copy necessary files 
+COPY ./mint-token-cli.sh ${SCRIPT_PATH}/mint-token-cli.sh
+COPY ./testnet/unit.json ${SCRIPT_PATH}/testnet/unit.json
 # Copy necessary binaries
 COPY --from=build /root/.cabal/bin/* /usr/local/bin/
 
