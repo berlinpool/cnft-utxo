@@ -1,3 +1,4 @@
 inputs/**
+!inputs/.gitkeep
 dist-newstyle/
 **/*.swp
