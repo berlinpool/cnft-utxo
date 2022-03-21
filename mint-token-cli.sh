@@ -24,23 +24,50 @@ pid=$(cardano-cli transaction policyid --script-file $policyFile)
 tnHex=$(token-name $tn)
 addr=$(cat $addrFile)
 v="$amt $pid.$tnHex"
+in_metadataFile=${INPUTS_DIR}/metadata.json
+out_metadataFile=${INPUTS_DIR}/metadata_out.json
 
 echo "currency symbol: $pid"
 echo "token name (hex): $tnHex"
 echo "minted value: $v"
 echo "address: $addr"
 
-cardano-cli transaction build \
-    $MAGIC \
-    --tx-in $oref \
-    --tx-in-collateral $oref \
-    --tx-out "$addr + 1500000 lovelace + $v" \
-    --mint "$v" \
-    --mint-script-file $policyFile \
-    --mint-redeemer-file testnet/unit.json \
-    --change-address $addr \
-    --protocol-params-file $ppFile \
-    --out-file $unsignedFile \
+if [[ "$NETWORK" == "mainnet" ]]; then
+cardano-cli query protocol-parameters --mainnet --out-file ${SCRIPT_PATH}/mainnet/protocol-parameters.json
+else
+cardano-cli query protocol-parameters --testnet-magic 1097911063 --out-file ${SCRIPT_PATH}/testnet/protocol-parameters.json
+fi
+
+if [ ! -f in_metadataFile ]; then
+    echo "metadata: none"
+    cardano-cli transaction build \
+        $MAGIC \
+        --tx-in $oref \
+        --tx-in-collateral $oref \
+        --tx-out "$addr + 1500000 lovelace + $v" \
+        --mint "$v" \
+        --mint-script-file $policyFile \
+        --mint-redeemer-file ${INPUTS_DIR}/unit.json \
+        --change-address $addr \
+        --protocol-params-file $ppFile \
+        --out-file $unsignedFile
+    else
+    sh ./create-metadata.sh $pid $in_metadataFile $out_metadataFile
+    echo "metadata: $(cat $mdata | jq .)"
+
+    cardano-cli transaction build \
+        $MAGIC \
+        --tx-in $oref \
+        --tx-in-collateral $oref \
+        --tx-out "$addr + 1500000 lovelace + $v" \
+        --mint "$v" \
+        --mint-script-file $policyFile \
+        --mint-redeemer-file ${INPUTS_DIR}/unit.json \
+        --metadata-json-file $out_metadataFile \
+        --change-address $addr \
+        --protocol-params-file $ppFile \
+        --out-file $unsignedFile
+fi
 
 cardano-cli transaction sign \
     --tx-body-file $unsignedFile \
