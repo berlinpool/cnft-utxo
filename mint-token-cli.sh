@@ -15,7 +15,7 @@ echo
 
 ppFile=${NETWORK}/protocol-parameters.json
 
-policyFile=${NETWORK}/token.plutus
+policyFile=token.plutus
 token-policy $policyFile $oref $tn
 
 unsignedFile=${NETWORK}/tx.unsigned
@@ -33,10 +33,13 @@ echo "minted value: $v"
 echo "address: $addr"
 
 if [[ "$NETWORK" == "mainnet" ]]; then
-cardano-cli query protocol-parameters --mainnet --out-file ${SCRIPT_PATH}/mainnet/protocol-parameters.json
+MAGIC=--mainnet
 else
-cardano-cli query protocol-parameters --testnet-magic 1097911063 --out-file ${SCRIPT_PATH}/testnet/protocol-parameters.json
+MAGIC=--testnet-magic 1097911063
 fi
+cardano-cli query protocol-parameters $MAGIC --out-file protocol-parameters.json
+pp=$(cat protocol-parameters.json | jq .)
+echo "params: $pp"
 
 if [ ! -f in_metadataFile ]; then
     echo "metadata: none"
@@ -49,7 +52,7 @@ if [ ! -f in_metadataFile ]; then
         --mint-script-file $policyFile \
         --mint-redeemer-file ${INPUTS_DIR}/unit.json \
         --change-address $addr \
-        --protocol-params-file $SCRIPT_PATH/$NETWORK/protocol-parameters.json \
+        --protocol-params-file protocol-parameters.json \
         --out-file $unsignedFile
     else
     sh ./create-metadata.sh $pid $in_metadataFile $out_metadataFile
