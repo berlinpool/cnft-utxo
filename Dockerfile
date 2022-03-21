@@ -78,13 +78,8 @@ COPY ./mint-token-cli.sh /usr/local/etc/mint-token-cli.sh
 COPY ./create-metadata.sh /usr/local/etc/create-metadata.sh
 COPY ./testnet/unit.json /var/cardano/inputs/unit.json
 
-ENTRYPOINT [ "/usr/loca/etc/mint-token-cli.sh" ]
-CMD [
-    "/var/cardano/inputs/utxo",
-    "/var/cardano/inputs/tokenname",
-    "/var/cardano/inputs/paymnet.addr",
-    "/var/cardano/inputs/payment.skey"
-]
+ENTRYPOINT [ "/usr/local/etc/mint-token-cli.sh" ]
+CMD [ "/var/cardano/inputs/utxo", "/var/cardano/inputs/tokenname", "/var/cardano/inputs/payment.addr", "/var/cardano/inputs/payment.skey" ]
 
 ENV SCRIPT_PATH=/usr/local/etc
 ENV INPUTS_DIR=/var/cardano/inputs
