@@ -1,8 +1,8 @@
 #!/bin/bash
 
-oref=$1
+oref=$(cat $1)
 amt=1
-tn=$2
+tn=$(cat $2)
 addrFile=$3
 skeyFile=$4
 
@@ -49,7 +49,7 @@ if [ ! -f in_metadataFile ]; then
         --mint-script-file $policyFile \
         --mint-redeemer-file ${INPUTS_DIR}/unit.json \
         --change-address $addr \
-        --protocol-params-file $ppFile \
+        --protocol-params-file $SCRIPT_PATH/$NETWORK/protocol-parameters.json \
         --out-file $unsignedFile
     else
     sh ./create-metadata.sh $pid $in_metadataFile $out_metadataFile
