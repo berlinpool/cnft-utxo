@@ -18,6 +18,9 @@ ppFile=protocol-parameters.json
 policyFile=token.plutus
 token-policy $policyFile $oref $tn
 
+tp=$(cat $policyFile)
+echo "token-policy: $tp"
+
 unsignedFile=${NETWORK}/tx.unsigned
 signedFile=${NETWORK}/tx.signed
 pid=$(cardano-cli transaction policyid --script-file $policyFile)
