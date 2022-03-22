@@ -11,7 +11,6 @@ echo "amt: $amt"
 echo "tn: $tn"
 echo "address file: $addrFile"
 echo "signing key file: $skeyFile"
-echo 
 
 mkdir -p $NETWORK
 ppFile=protocol-parameters.json
@@ -40,12 +39,24 @@ else
 MAGIC=--testnet-magic 1097911063
 fi
 cardano-cli query protocol-parameters $MAGIC --out-file protocol-parameters.json
-pp=$(cat protocol-parameters.json | jq .)
-echo "params: $pp"
-echo $(ls -la /var/cardano/inputs)
-echo $(echo $in_metadataFile)
 
-if [ ! -f in_metadataFile ]; then
+if [ -f "$in_metadataFile" ]; then
+    sh ./create-metadata.sh $pid $in_metadataFile $out_metadataFile
+    echo "metadata: $(cat $out_metadataFile | jq .)"
+
+    cardano-cli transaction build \
+        $MAGIC \
+        --tx-in $oref \
+        --tx-in-collateral $oref \
+        --tx-out "$addr + 1500000 lovelace + $v" \
+        --mint "$v" \
+        --mint-script-file $policyFile \
+        --mint-redeemer-file /usr/local/etc/unit.json \
+        --change-address $addr \
+        --metadata-json-file $out_metadataFile \
+        --protocol-params-file $ppFile \
+        --out-file $unsignedFile
+else
     echo "metadata: none"
     cardano-cli transaction build \
         $MAGIC \
@@ -56,22 +67,6 @@ if [ ! -f in_metadataFile ]; then
         --mint-script-file $policyFile \
         --mint-redeemer-file /usr/local/etc/unit.json \
         --change-address $addr \
-        --protocol-params-file protocol-parameters.json \
-        --out-file $unsignedFile
-    else
-    sh ./create-metadata.sh $pid $in_metadataFile $out_metadataFile
-    echo "metadata: $(cat $mdata | jq .)"
-
-    cardano-cli transaction build \
-        $MAGIC \
-        --tx-in $oref \
-        --tx-in-collateral $oref \
-        --tx-out "$addr + 1500000 lovelace + $v" \
-        --mint "$v" \
-        --mint-script-file $policyFile \
-        --mint-redeemer-file ${INPUTS_DIR}/unit.json \
-        --change-address $addr \
-        --metadata-json-file $out_metadataFile \
         --protocol-params-file $ppFile \
         --out-file $unsignedFile
 fi
