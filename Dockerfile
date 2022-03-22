@@ -74,6 +74,7 @@ WORKDIR /usr/local/etc
 COPY ./mint-token-cli.sh /tmp/nft/mint-token-cli.sh
 COPY ./create-metadata.sh /tmp/nft/create-metadata.sh
 
+RUN cp /tmp/nft/clean-up.sh /usr/local/etc/clean-up.sh
 RUN cp /tmp/nft/mint-token-cli.sh /usr/local/etc/mint-token-cli.sh
 RUN cp /tmp/nft/create-metadata.sh /usr/local/etc/create-metadata.sh
 RUN cp /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
