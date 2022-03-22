@@ -37,7 +37,7 @@ RUN mkdir -p /etc/nix &&\
     echo "trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=" >> /etc/nix/nix.conf
 
 RUN mkdir -p /tmp/nft
-RUN git clone https://github.com/william-wolff-io/nft-maker.git /tmp/nft
+RUN git clone https://github.com/william-wolff-io/nft-maker.git /tmp/nft/
 RUN git clone https://github.com/input-output-hk/plutus-apps.git /tmp/plutus-apps/
 WORKDIR /tmp/plutus-apps/
 # Git commit id must match cabal.project tag
@@ -47,9 +47,6 @@ ENV PATH="$PATH:/nix/var/nix/profiles/default/bin:/usr/local/bin:/bin:/root/.cab
 # Update & Build binaries required for plutus & nft repository
 RUN nix-shell --run 'cd /tmp/nft/ && cabal update && cabal install && cp $(which cardano-cli) /usr/local/bin/cardano-cli'
 WORKDIR /usr/local/etc
-RUN rm -rf /tmp/nft /tmp/plutus-apps
-# Copy cardano-cli binary to .cabal/bin for copying later during RUN phase
-# RUN cp /nix/store/*exe-cardano-cli-*/bin/cardano-cli /usr/local/bin/cardano-cli
 
 #                                                                              #
 # ---------------------------------- RUN ------------------------------------- #
@@ -67,16 +64,18 @@ RUN rm -rf /tmp/nft /tmp/plutus-apps
 # Have fully synced cardano node ready whose ipc socket file can be exposed via docker volume!
 # We presume node-ipc is an existing volume which contains node.socket
 #
-# Create container by running:
+# Either run docker-run.sh or the following command:
 # docker run --name nft \
 #   -v node-ipc:/opt/cardano/ipc \
 #   -v $(pwd)/inputs:/var/cardano/inputs \
 #   psg/nft:latest
 
 # Copy necessary files 
-COPY ./mint-token-cli.sh /usr/local/etc/mint-token-cli.sh
-COPY ./create-metadata.sh /usr/local/etc/create-metadata.sh
-COPY ./testnet/unit.json /var/cardano/inputs/unit.json
+RUN cp /tmp/nft/mint-token-cli.sh /usr/local/etc/mint-token-cli.sh
+RUN cp /tmp/nft/create-metadata.sh /usr/local/etc/create-metadata.sh
+RUN cp /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
+# Remove cloned repos for binary build
+RUN rm -rf /tmp/nft /tmp/plutus-apps
 
 ENTRYPOINT [ "/usr/local/etc/mint-token-cli.sh" ]
 CMD [ "/var/cardano/inputs/utxo", "/var/cardano/inputs/tokenname", "/var/cardano/inputs/payment.addr", "/var/cardano/inputs/payment.skey" ]

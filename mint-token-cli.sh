@@ -50,7 +50,7 @@ if [ ! -f in_metadataFile ]; then
         --tx-out "$addr + 1500000 lovelace + $v" \
         --mint "$v" \
         --mint-script-file $policyFile \
-        --mint-redeemer-file ${INPUTS_DIR}/unit.json \
+        --mint-redeemer-file /usr/local/etc/unit.json \
         --change-address $addr \
         --protocol-params-file protocol-parameters.json \
         --out-file $unsignedFile
