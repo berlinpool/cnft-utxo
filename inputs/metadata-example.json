@@ -2,5 +2,12 @@
   "id": 1,
   "name": "Input Output Global",
   "description": "SAs are the coolest", 
-  "image": "ipfs://QmSEyyUDLGDHefKk6SVRzLtF9e8M87djYoqR4Ntp8CxqEE"
+  "image": "ipfs://QmSEyyUDLGDHefKk6SVRzLtF9e8M87djYoqR4Ntp8CxqEE",
+  "files": [
+    {
+      "name": "Input Output Global",
+      "src": "ipfs://QmSEyyUDLGDHefKk6SVRzLtF9e8M87djYoqR4Ntp8CxqEE",
+      "mediaType": "image/jpeg"
+    }
+  ]
 }
