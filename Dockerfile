@@ -71,6 +71,9 @@ WORKDIR /usr/local/etc
 #   psg/nft:latest
 
 # Copy necessary files 
+COPY ./mint-token-cli.sh /tmp/nft/mint-token-cli.sh
+COPY ./create-metadata.sh /tmp/nft/create-metadata.sh
+
 RUN cp /tmp/nft/mint-token-cli.sh /usr/local/etc/mint-token-cli.sh
 RUN cp /tmp/nft/create-metadata.sh /usr/local/etc/create-metadata.sh
 RUN cp /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
@@ -78,10 +81,9 @@ RUN cp /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
 RUN rm -rf /tmp/nft /tmp/plutus-apps
 
 ENTRYPOINT [ "/usr/local/etc/mint-token-cli.sh" ]
-CMD [ "/var/cardano/inputs/utxo", "/var/cardano/inputs/tokenname", "/var/cardano/inputs/payment.addr", "/var/cardano/inputs/payment.skey" ]
+CMD [ "utxo", "tokenname", "payment.addr", "payment.skey" ]
 
 ENV SCRIPT_PATH=/usr/local/etc
 ENV INPUTS_DIR=/var/cardano/inputs
 ENV NETWORK=mainnet
-ENV MAGIC=--mainnet
 ENV CARDANO_NODE_SOCKET_PATH=/opt/cardano/ipc/node.socket
