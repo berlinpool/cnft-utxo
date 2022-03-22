@@ -1,4 +1,5 @@
 inputs/**
 !inputs/.gitkeep
+!inputs/metadata-example.json
 dist-newstyle/
 **/*.swp
