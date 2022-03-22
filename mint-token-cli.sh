@@ -13,7 +13,7 @@ echo "address file: $addrFile"
 echo "signing key file: $skeyFile"
 echo 
 
-ppFile=${NETWORK}/protocol-parameters.json
+ppFile=protocol-parameters.json
 
 policyFile=token.plutus
 token-policy $policyFile $oref $tn
