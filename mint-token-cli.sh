@@ -69,8 +69,8 @@ if [ ! -f in_metadataFile ]; then
         --mint "$v" \
         --mint-script-file $policyFile \
         --mint-redeemer-file ${INPUTS_DIR}/unit.json \
-        --metadata-json-file $out_metadataFile \
         --change-address $addr \
+        --metadata-json-file $out_metadataFile \
         --protocol-params-file $ppFile \
         --out-file $unsignedFile
 fi
