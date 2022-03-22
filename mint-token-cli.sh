@@ -13,14 +13,13 @@ echo "address file: $addrFile"
 echo "signing key file: $skeyFile"
 echo 
 
+mkdir -p $NETWORK
 ppFile=protocol-parameters.json
 
 policyFile=token.plutus
 token-policy $policyFile $oref $tn
 
 tp=$(cat $policyFile)
-echo "token-policy: $tp"
-
 unsignedFile=${NETWORK}/tx.unsigned
 signedFile=${NETWORK}/tx.signed
 pid=$(cardano-cli transaction policyid --script-file $policyFile)
@@ -43,6 +42,8 @@ fi
 cardano-cli query protocol-parameters $MAGIC --out-file protocol-parameters.json
 pp=$(cat protocol-parameters.json | jq .)
 echo "params: $pp"
+echo $(ls -la /var/cardano/inputs)
+echo $(echo $in_metadataFile)
 
 if [ ! -f in_metadataFile ]; then
     echo "metadata: none"
