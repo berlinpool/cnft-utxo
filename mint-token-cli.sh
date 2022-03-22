@@ -12,11 +12,13 @@ echo "tn: $tn"
 echo "address file: $addrFile"
 echo "signing key file: $skeyFile"
 
+mkdir -p ${INPUTS_DIR}/policies
 mkdir -p $NETWORK
 ppFile=protocol-parameters.json
 
 policyFile=token.plutus
 token-policy $policyFile $oref $tn
+cp ./${policyFile} ${INPUTS_DIR}/policies/${tn}.plutus
 
 tp=$(cat $policyFile)
 unsignedFile=${NETWORK}/tx.unsigned
@@ -41,7 +43,7 @@ fi
 cardano-cli query protocol-parameters $MAGIC --out-file protocol-parameters.json
 
 if [ -f "$in_metadataFile" ]; then
-    sh ./create-metadata.sh $pid $in_metadataFile $out_metadataFile
+    sh ./create-metadata.sh $pid $tn $in_metadataFile $out_metadataFile
     echo "metadata: $(cat $out_metadataFile | jq .)"
 
     cardano-cli transaction build \
