@@ -1,10 +1,21 @@
 #!/bin/bash
+# Set environment variables correctly for network & cardano-cli
+if [[ "$NETWORK" == "mainnet" ]]; then
+    MAGIC=--mainnet
+    NETWORK=mainnet
+else
+    MAGIC="--testnet-magic 1097911063"
+    NETWORK=testnet
+fi
 
-oref=$(cat $1)
+echo "Network: $NETWORK"
+utxoFile=${INPUTS_DIR}/${NETWORK}/$1
+tnFile=${INPUTS_DIR}/${NETWORK}/$2
+oref=$(cat $utxoFile)
 amt=1
-tn=$(cat $2)
-addrFile=$3
-skeyFile=$4
+tn=$(cat $tnFile)
+addrFile=${INPUTS_DIR}/${NETWORK}/$3
+skeyFile=${INPUTS_DIR}/${NETWORK}/$4
 
 echo "oref: $oref"
 echo "amt: $amt"
@@ -12,35 +23,37 @@ echo "tn: $tn"
 echo "address file: $addrFile"
 echo "signing key file: $skeyFile"
 
-mkdir -p ${INPUTS_DIR}/policies
-mkdir -p $NETWORK
-ppFile=protocol-parameters.json
+
+# Setup directory to backup policy scripts inside inputs volume
+txsFolder=${INPUTS_DIR}/${NETWORK}/txs
+mkdir -p $txsFolder
+
+policyFolder=${INPUTS_DIR}/${NETWORK}/policies
+mkdir -p $policyFolder
+ppFile=/tmp/protocol-parameters.json
 
 policyFile=token.plutus
+# Generate policy script
 token-policy $policyFile $oref $tn
-cp ./${policyFile} ${INPUTS_DIR}/policies/${tn}.plutus
 
-tp=$(cat $policyFile)
-unsignedFile=${NETWORK}/tx.unsigned
-signedFile=${NETWORK}/tx.signed
+unsignedFile=/tmp/tx.unsigned
+signedFile=/tmp/tx.signed
+# Generate policyId - script hash/ currency symbol
 pid=$(cardano-cli transaction policyid --script-file $policyFile)
+cp ./${policyFile} ${policyFolder}/${pid}.${tn}.plutus
 tnHex=$(token-name $tn)
 addr=$(cat $addrFile)
 v="$amt $pid.$tnHex"
 in_metadataFile=${INPUTS_DIR}/metadata.json
-out_metadataFile=${INPUTS_DIR}/metadata_out.json
+out_metadataFile=/tmp/metadata_out.json
 
 echo "currency symbol: $pid"
 echo "token name (hex): $tnHex"
 echo "minted value: $v"
 echo "address: $addr"
 
-if [[ "$NETWORK" == "mainnet" ]]; then
-MAGIC=--mainnet
-else
-MAGIC=--testnet-magic 1097911063
-fi
-cardano-cli query protocol-parameters $MAGIC --out-file protocol-parameters.json
+# Query for current protocol parameters in respect to network
+cardano-cli query protocol-parameters $MAGIC --out-file $ppFile
 
 if [ -f "$in_metadataFile" ]; then
     sh ./create-metadata.sh $pid $tn $in_metadataFile $out_metadataFile
@@ -82,3 +95,24 @@ cardano-cli transaction sign \
 cardano-cli transaction submit \
     $MAGIC \
     --tx-file $signedFile
+
+tx=$(cardano-cli transaction view --tx-file $signedFile)
+txid=$(cardano-cli transaction txid --tx-file $signedFile)
+
+echo $tx > ${txsFolder}/${txid}.tx
+echo "Wrote transaction to file $txsFolder/$txid.tx"
+sh ./clean-up.sh
+
+echo "Visit: "
+if [[ "$NETWORK" == "mainnet" ]]; then
+    echo "Transaction:  https://cardanoscan.io/transaction/$txid"
+    echo "Address:      https://cardanoscan.io/address/$addr"
+    echo "TokenPolicy:  https://cardanoscan.io/tokenPolicy/$pid"
+else
+    echo "Transaction:  https://testnet.cardanoscan.io/transaction/$txid"
+    echo "Address:      https://testnet.cardanoscan.io/address/$addr"
+    echo "TokenPolicy:  https://testnet.cardanoscan.io/tokenPolicy/$pid"
+fi
+
+echo "Overriding utxo file with new txHash#txId"
+echo "$txid#0" > $utxoFile
