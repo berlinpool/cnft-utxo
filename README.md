@@ -26,9 +26,9 @@ docker run --detach \
     -p 3001:3001 \
     -e CARDANO_UPDATE_TOPOLOGY=true \
     -e CARDANO_NETWORK=mainnet|testnet \
-  	-v node-config:/opt/cardano/config \
-  	-v node-data:/opt/cardano/data \
-  	-v node-ipc:/opt/cardano/ipc \
+    -v node-config:/opt/cardano/config \
+    -v node-data:/opt/cardano/data \
+    -v node-ipc:/opt/cardano/ipc \
     nessusio/cardano-node run
 ```
 
