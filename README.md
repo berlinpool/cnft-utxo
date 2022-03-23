@@ -1,6 +1,6 @@
 # NFT Maker
 
-The following repository allows to create a docker image that sets up all the dependencies in order to run any container as executable by providing specific input files.
+The following repository allows to create NFTs on the Cardano Blockchain via docker image that sets up all the required dependencies. Containers of the image run as executable by providing specific input files.
 
 ## Requirements
 
@@ -46,6 +46,8 @@ created for the required input files. The default location is
 **./inputs**.
 
 Update the following files respectively to your needs:
+
+### Input Files
 
 - ./inputs/metadata.json
 - ./inputs/<network>/payment.addr
