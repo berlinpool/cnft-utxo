@@ -35,7 +35,7 @@ docker run --detach \
 Check sync status with:
 `docker exec -it relay gLiveView`
 
-Checkout their (docker hub|https://hub.docker.com/r/nessusio/cardano-node) for more info.
+Checkout their [docker hub](https://hub.docker.com/r/nessusio/cardano-node) for more info.
 
 *The synchronization of a node usuallz takes a couple hours*
 
