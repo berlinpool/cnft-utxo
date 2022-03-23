@@ -37,7 +37,7 @@ Check sync status with:
 
 Checkout their [docker hub](https://hub.docker.com/r/nessusio/cardano-node) for more info.
 
-*The synchronization of a node usuallz takes a couple hours*
+*The synchronization of a node usually takes a couple hours*
 
 Once the image is built and the node is in sync, continue by preparing the inputs for the container.
 
@@ -50,11 +50,11 @@ Update the following files respectively to your needs:
 ### Input Files
 
 - ./inputs/metadata.json
-- ./inputs/<network>/payment.addr
-- ./inputs/<network>/payment.vkey
-- ./inputs/<network>/payment.skey
-- ./inputs/<network>/tokenname
-- ./inputs/<network>/utxo
+- ./inputs/*network*/payment.addr
+- ./inputs/*network*/payment.vkey
+- ./inputs/*network*/payment.skey
+- ./inputs/*network*/tokenname
+- ./inputs/*network*/utxo
 
 After creating the files for the respective network,
 
