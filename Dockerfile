@@ -70,9 +70,10 @@ WORKDIR /usr/local/etc
 #   -v $(pwd)/inputs:/var/cardano/inputs \
 #   psg/nft:latest
 
-# Copy necessary files 
+# Copy necessary files - TODO: Remove the following COPY stmnt - only necessart to aoiv docker caching for git clone
 COPY ./mint-token-cli.sh /tmp/nft/mint-token-cli.sh
 COPY ./create-metadata.sh /tmp/nft/create-metadata.sh
+COPY ./clean-up.sh /tmp/nft/clean-up.sh
 
 RUN cp /tmp/nft/clean-up.sh /usr/local/etc/clean-up.sh
 RUN cp /tmp/nft/mint-token-cli.sh /usr/local/etc/mint-token-cli.sh
