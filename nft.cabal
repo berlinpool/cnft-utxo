@@ -28,12 +28,12 @@ library
                      , data-default
                      , freer-extras
                      , openapi3
-                    --  , playground-common
+                     , playground-common
                      , plutus-contract
                      , plutus-ledger
                      , plutus-ledger-api
                      , plutus-ledger-constraints
-                    --  , plutus-pab
+                     , plutus-pab
                      , plutus-tx-plugin
                      , plutus-tx
                      , plutus-use-cases
