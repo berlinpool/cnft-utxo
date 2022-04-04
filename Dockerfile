@@ -15,10 +15,10 @@
 #	  default values provided in docker volume
 
 #                                                                              #
-# --------------------------- BUILD (plutus) --------------------------------- #
+# --------------------------------- BUILD ------------------------------------ #
 #                                                                              #
 
-FROM ubuntu:20.04
+FROM ubuntu:20.04 AS builder
 
 # GIT COMMIT id which must match with plutus-apps dependency in the cabal.project file of nft repo
 ARG COMMIT_ID=6e3f6a59d64f6d4cd9d38bf263972adaf4f7b244
@@ -45,12 +45,21 @@ RUN git checkout $COMMIT_ID
 # Set PATH to include .nix_profile & cabal/bin path to run nix-shell
 ENV PATH="$PATH:/nix/var/nix/profiles/default/bin:/usr/local/bin:/bin:/root/.cabal/bin"
 # Update & Build binaries required for plutus & nft repository
-RUN nix-shell --run 'cd /tmp/nft/ && cabal update && cabal install && cp $(which cardano-cli) /usr/local/bin/cardano-cli'
+
+# RUN nix-shell --run 'cd /tmp/nft/ && cabal update && cabal install && cp $(which cardano-cli) /usr/local/bin/cardano-cli'
+RUN /tmp/nft/scripts/build-nft-binaries-store.sh
 WORKDIR /usr/local/etc
 
+ENTRYPOINT [ "/bin/sh" ]
+
 #                                                                              #
-# ---------------------------------- RUN ------------------------------------- #
+# --------------------------------- PROD ------------------------------------- #
 #                                                                              #
+
+FROM scratch
+
+COPY --from=builder /tmp/nix-store/nix /nix/
+COPY --from=builder /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
 
 # Prerequisites:
 #
@@ -70,10 +79,11 @@ WORKDIR /usr/local/etc
 #   -v $(pwd)/inputs:/var/cardano/inputs \
 #   psg/nft:latest
 
-# Copy necessary files - TODO: Remove the following COPY stmnt - only necessart to aoiv docker caching for git clone
-COPY ./mint-token-cli.sh /tmp/nft/mint-token-cli.sh
-COPY ./create-metadata.sh /tmp/nft/create-metadata.sh
-COPY ./clean-up.sh /tmp/nft/clean-up.sh
+# NOTE: Only used for developing docker image
+# TODO: Remove the following COPY stmnt - only necessary to avoid docker caching for git clone
+COPY ./scripts/mint-token-cli.sh /tmp/nft/mint-token-cli.sh
+COPY ./scripts/create-metadata.sh /tmp/nft/create-metadata.sh
+COPY ./scripts/clean-up.sh /tmp/nft/clean-up.sh
 
 RUN cp /tmp/nft/clean-up.sh /usr/local/etc/clean-up.sh
 RUN cp /tmp/nft/mint-token-cli.sh /usr/local/etc/mint-token-cli.sh
@@ -82,8 +92,9 @@ RUN cp /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
 # Remove cloned repos for binary build
 RUN rm -rf /tmp/nft /tmp/plutus-apps
 
-ENTRYPOINT [ "/usr/local/etc/mint-token-cli.sh" ]
-CMD [ "utxo", "tokenname", "payment.addr", "payment.skey" ]
+# ENTRYPOINT [ "/usr/local/etc/mint-token-cli.sh" ]
+# CMD [ "utxo", "tokenname", "payment.addr", "payment.skey" ]
+ENTRYPOINT [ "/bin/sh" ]
 
 ENV SCRIPT_PATH=/usr/local/etc
 ENV INPUTS_DIR=/var/cardano/inputs
