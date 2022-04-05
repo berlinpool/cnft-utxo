@@ -39,7 +39,6 @@ import           Tools.Utils                (getCredentials)
 
 data TokenParams = TokenParams
     { tpToken   :: !TokenName
-    -- , tpAmount  :: !Integer
     , tpAddress :: !Address
     } deriving (Prelude.Eq, Prelude.Ord, Generic, FromJSON, ToJSON, ToSchema, Show)
 
