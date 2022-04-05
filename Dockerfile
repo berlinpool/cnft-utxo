@@ -45,9 +45,7 @@ RUN git checkout $COMMIT_ID
 # Set PATH to include .nix_profile & cabal/bin path to run nix-shell
 ENV PATH="$PATH:/nix/var/nix/profiles/default/bin:/usr/local/bin:/bin:/root/.cabal/bin"
 # Update & Build binaries required for plutus & nft repository
-
-# RUN nix-shell --run 'cd /tmp/nft/ && cabal update && cabal install && cp $(which cardano-cli) /usr/local/bin/cardano-cli'
-RUN /tmp/nft/scripts/build-nft-binaries-store.sh
+RUN /tmp/nft/scripts/build/build-nft-binaries-store.sh
 WORKDIR /usr/local/etc
 
 ENTRYPOINT [ "/bin/sh" ]
@@ -60,6 +58,8 @@ FROM scratch
 
 COPY --from=builder /tmp/nix-store/nix /nix/
 COPY --from=builder /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
+COPY --from=builder /tmp/nft/scripts/mint/*.sh /usr/local/etc/
+COPY --from=builder /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
 
 # Prerequisites:
 #
@@ -81,16 +81,17 @@ COPY --from=builder /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
 
 # NOTE: Only used for developing docker image
 # TODO: Remove the following COPY stmnt - only necessary to avoid docker caching for git clone
-COPY ./scripts/mint-token-cli.sh /tmp/nft/mint-token-cli.sh
-COPY ./scripts/create-metadata.sh /tmp/nft/create-metadata.sh
-COPY ./scripts/clean-up.sh /tmp/nft/clean-up.sh
+# RUN mkdir -p /tmp/nft
+# COPY ./scripts/mint-token-cli.sh /tmp/nft/mint-token-cli.sh
+# COPY ./scripts/create-metadata.sh /tmp/nft/create-metadata.sh
+# COPY ./scripts/clean-up.sh /tmp/nft/clean-up.sh
 
-RUN cp /tmp/nft/clean-up.sh /usr/local/etc/clean-up.sh
-RUN cp /tmp/nft/mint-token-cli.sh /usr/local/etc/mint-token-cli.sh
-RUN cp /tmp/nft/create-metadata.sh /usr/local/etc/create-metadata.sh
-RUN cp /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
+# RUN cp /tmp/nft/clean-up.sh /usr/local/etc/clean-up.sh
+# RUN cp /tmp/nft/mint-token-cli.sh /usr/local/etc/mint-token-cli.sh
+# RUN cp /tmp/nft/create-metadata.sh /usr/local/etc/create-metadata.sh
+# RUN cp /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
 # Remove cloned repos for binary build
-RUN rm -rf /tmp/nft /tmp/plutus-apps
+# RUN rm -rf /tmp/nft /tmp/plutus-apps
 
 # ENTRYPOINT [ "/usr/local/etc/mint-token-cli.sh" ]
 # CMD [ "utxo", "tokenname", "payment.addr", "payment.skey" ]
