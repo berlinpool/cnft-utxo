@@ -14,7 +14,6 @@ if [ -z "$1" ]; then
     NETWORK=$1
 fi
 
-
 if [[ $NETWORK == "mainnet" ]]; then
 	docker run -it --name nft --rm \
 		-v relay1-ipc:/opt/cardano/ipc \
