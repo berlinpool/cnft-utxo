@@ -125,7 +125,7 @@ txid=$(cardano-cli transaction txid --tx-file $signedFile)
 
 echo $tx > ${txsFolder}/${txid}.tx
 echo "Submitted transaction & saved to file $txsFolder/$txid.tx"
-./clean-up.sh
+rm -rf /tmp/tx.unsigned /tmp/tx.signed /tmp/protocol-parameters.json /tmp/metadata_out.json
 
 echo "Find out more on-chain: "
 if [[ "$NETWORK" == "mainnet" ]]; then
