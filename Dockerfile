@@ -1,18 +1,22 @@
 #
-# Image build:
+# Image build: (builds cardano-cli, token-name and token-policy binary)
+# (1) Build stage:
 #	- install nix
 #	- set up IOHK binary cache
-#	- build plutus binaries using nix-shell
-#	- build nft binaries using cabal
-#	- copy cardano-cli binary and nft binaries to /root/.cabal/bin
+#   - checkout plutus-apps & nft repository
+#	- build plutus binaries using nix-shell 
+#     - install nft binaries via cabal
+#     - copy cardano-cli binary to /usr/local/bin
+#   - extract required dynamically linked libraries from all three target binaries
+#       - copy libs to temporary nix store (/tmp/nix-store)
 # (2) RUN stage:
-#	- set up environment variables with default values
-#	- copy binaries from build stage /root/.cabal/bin to /usr/local/bin
-#	- copy mint cli script to /usr/local/etc
+#	- copy minimized temporary nix store to executable container
+#	- copy target binaries to executable container
+#	- copy mint cli script and auxiliary files to /usr/local/etc
 #	- update PATH to include binaries
-#	- fetch current protocol parameters via CLI for testnet & mainnet to reduce script runtime
 #  	- set CMD and ENTRYPOINT to run docker container as executable with respective
 #	  default values provided in docker volume
+#	- set up environment variables with default values
 
 #                                                                              #
 # --------------------------------- BUILD ------------------------------------ #
@@ -42,25 +46,18 @@ RUN git clone https://github.com/input-output-hk/plutus-apps.git /tmp/plutus-app
 WORKDIR /tmp/plutus-apps/
 # Git commit id must match cabal.project tag
 RUN git checkout $COMMIT_ID
-# Set PATH to include .nix_profile & cabal/bin path to run nix-shell
+# Set PATH to include .nix_profile & cabal/bin path to run nix-shell & find binaries
 ENV PATH="$PATH:/nix/var/nix/profiles/default/bin:/usr/local/bin:/bin:/root/.cabal/bin"
+# Expensive command kept isolated to make use of docker cache
 # Update & Build binaries required for plutus & nft repository
+RUN nix-shell --run 'cd /tmp/nft/ && cabal update && cabal install && cp $(which cardano-cli) /usr/local/bin/cardano-cli 2>&1'
 RUN /tmp/nft/scripts/build/build-nft-binaries-store.sh
-WORKDIR /usr/local/etc
 
-ENTRYPOINT [ "/bin/sh" ]
+ENTRYPOINT [ "/bin/bash" ]
 
 #                                                                              #
 # --------------------------------- PROD ------------------------------------- #
 #                                                                              #
-
-FROM scratch
-
-COPY --from=builder /tmp/nix-store/nix /nix/
-COPY --from=builder /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
-COPY --from=builder /tmp/nft/scripts/mint/*.sh /usr/local/etc/
-COPY --from=builder /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
-
 # Prerequisites:
 #
 # Provide the following input files unless ENV variables are overriden:
@@ -79,23 +76,25 @@ COPY --from=builder /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
 #   -v $(pwd)/inputs:/var/cardano/inputs \
 #   psg/nft:latest
 
-# NOTE: Only used for developing docker image
-# TODO: Remove the following COPY stmnt - only necessary to avoid docker caching for git clone
-# RUN mkdir -p /tmp/nft
-# COPY ./scripts/mint-token-cli.sh /tmp/nft/mint-token-cli.sh
-# COPY ./scripts/create-metadata.sh /tmp/nft/create-metadata.sh
-# COPY ./scripts/clean-up.sh /tmp/nft/clean-up.sh
+FROM ubuntu:20.04
 
-# RUN cp /tmp/nft/clean-up.sh /usr/local/etc/clean-up.sh
-# RUN cp /tmp/nft/mint-token-cli.sh /usr/local/etc/mint-token-cli.sh
-# RUN cp /tmp/nft/create-metadata.sh /usr/local/etc/create-metadata.sh
-# RUN cp /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
-# Remove cloned repos for binary build
-# RUN rm -rf /tmp/nft /tmp/plutus-apps
+RUN apt-get update && apt-get install --no-install-recommends -y locales pkg-config patchelf vim ca-certificates jq && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# ENTRYPOINT [ "/usr/local/etc/mint-token-cli.sh" ]
-# CMD [ "utxo", "tokenname", "payment.addr", "payment.skey" ]
-ENTRYPOINT [ "/bin/sh" ]
+# Copy nix depdencies
+COPY --from=builder /tmp/nix-store/nix /nix
+# Copy binaries
+COPY --from=builder /root/.cabal/bin/token-name /usr/local/bin
+COPY --from=builder /root/.cabal/bin/token-policy /usr/local/bin
+COPY --from=builder /usr/local/bin/cardano-cli /usr/local/bin
+
+# Copy script & auxiliary files
+COPY --from=builder /tmp/nft/scripts/mint/create-metadata.sh /usr/local/etc/create-metadata.sh
+COPY --from=builder /tmp/nft/scripts/mint/mint-token-cli.sh /usr/local/etc/mint-token-cli.sh
+COPY --from=builder /tmp/nft/scripts/mint/clean-up.sh /usr/local/etc/clean-up.sh
+COPY --from=builder /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
+
+ENTRYPOINT [ "/usr/local/etc/mint-token-cli.sh" ]
+CMD [ "/usr/local/etc/mint-token-cli.sh", "utxo", "tokenname", "payment.addr", "payment.skey" ]
 
 ENV SCRIPT_PATH=/usr/local/etc
 ENV INPUTS_DIR=/var/cardano/inputs
