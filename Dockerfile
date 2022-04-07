@@ -41,6 +41,8 @@ RUN mkdir -p /etc/nix &&\
     echo "trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=" >> /etc/nix/nix.conf
 
 RUN mkdir -p /tmp/nft
+# the following prevent docker caching via github's versioning as the head changes
+ADD https://api.github.com/repos/william-wolff-io/nft-maker/git/refs/heads/master version.json
 RUN git clone https://github.com/william-wolff-io/nft-maker.git /tmp/nft/
 RUN git clone https://github.com/input-output-hk/plutus-apps.git /tmp/plutus-apps/
 WORKDIR /tmp/plutus-apps/
@@ -90,7 +92,6 @@ COPY --from=builder /usr/local/bin/cardano-cli /usr/local/bin
 # Copy script & auxiliary files
 COPY --from=builder /tmp/nft/scripts/mint/create-metadata.sh /usr/local/etc/create-metadata.sh
 COPY --from=builder /tmp/nft/scripts/mint/mint-token-cli.sh /usr/local/etc/mint-token-cli.sh
-COPY --from=builder /tmp/nft/scripts/mint/clean-up.sh /usr/local/etc/clean-up.sh
 COPY --from=builder /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
 
 ENTRYPOINT [ "/usr/local/etc/mint-token-cli.sh" ]
