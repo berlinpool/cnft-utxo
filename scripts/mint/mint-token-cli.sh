@@ -1,4 +1,11 @@
 #!/bin/bash
+
+set -e
+# keep track of the last executed command
+trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
+# echo an error message before exiting
+trap 'echo "\"${last_command}\" command failed with exit code $?"' EXIT
+
 # Set environment variables correctly for network & cardano-cli
 if [[ "$NETWORK" == "mainnet" ]]; then
     MAGIC=--mainnet
@@ -9,20 +16,44 @@ else
 fi
 
 echo "Network: $NETWORK"
+
+# Validate UTxO file exists
 utxoFile=${INPUTS_DIR}/${NETWORK}/$1
+if [[ -f "$utxoFile" ]]; then
+    oref=$(cat $utxoFile)
+else
+    echo "No UTxO file found: $utxoFile"
+    exit 1;
+fi
+
+# Validate tn (token name) file exists
 tnFile=${INPUTS_DIR}/${NETWORK}/$2
-oref=$(cat $utxoFile)
-amt=1
-tn=$(cat $tnFile)
+if [ ! -f "$tnFile" ]; then
+    echo "No token name file found: $tnFile"
+    exit 1;
+else
+    tn=$(cat $tnFile)
+fi
+
+# Validate Address file exists
 addrFile=${INPUTS_DIR}/${NETWORK}/$3
+if [ ! -f "$addrFile" ]; then
+    echo "No address file found: $addrFile"
+    exit 1;
+fi
+
+# Validate signing file exists
 skeyFile=${INPUTS_DIR}/${NETWORK}/$4
+if [ ! -f "$skeyFile" ]; then
+    echo "No signing file found: $skeyFile"
+    exit 1;
+fi
 
-echo "oref: $oref"
-echo "amt: $amt"
-echo "tn: $tn"
+amt=1
+echo "Found inputs:"
+echo "utxo: $oref"
+echo "token name: $tn"
 echo "address file: $addrFile"
-echo "signing key file: $skeyFile"
-
 
 # Setup directory to backup policy scripts inside inputs volume
 txsFolder=${INPUTS_DIR}/${NETWORK}/txs
@@ -40,25 +71,19 @@ unsignedFile=/tmp/tx.unsigned
 signedFile=/tmp/tx.signed
 # Generate policyId - script hash/ currency symbol
 pid=$(cardano-cli transaction policyid --script-file $policyFile)
-cp ./${policyFile} ${policyFolder}/${pid}.${tn}.plutus
 tnHex=$(token-name $tn)
+cp ./${policyFile} ${policyFolder}/${pid}.${tnHex}.plutus
+echo "Generated policy file ${policyFolder}/${pid}.${tnHex}.plutus"
 addr=$(cat $addrFile)
 v="$amt $pid.$tnHex"
 in_metadataFile=${INPUTS_DIR}/metadata.json
 out_metadataFile=/tmp/metadata_out.json
-
-echo "currency symbol: $pid"
-echo "token name (hex): $tnHex"
-echo "minted value: $v"
-echo "address: $addr"
 
 # Query for current protocol parameters in respect to network
 cardano-cli query protocol-parameters $MAGIC --out-file $ppFile
 
 if [ -f "$in_metadataFile" ]; then
     sh ./create-metadata.sh $pid $tn $in_metadataFile $out_metadataFile
-    echo "metadata: $(cat $out_metadataFile | jq .)"
-
     cardano-cli transaction build \
         $MAGIC \
         --tx-in $oref \
@@ -72,7 +97,6 @@ if [ -f "$in_metadataFile" ]; then
         --protocol-params-file $ppFile \
         --out-file $unsignedFile
 else
-    echo "metadata: none"
     cardano-cli transaction build \
         $MAGIC \
         --tx-in $oref \
@@ -100,10 +124,10 @@ tx=$(cardano-cli transaction view --tx-file $signedFile)
 txid=$(cardano-cli transaction txid --tx-file $signedFile)
 
 echo $tx > ${txsFolder}/${txid}.tx
-echo "Wrote transaction to file $txsFolder/$txid.tx"
-sh ./clean-up.sh
+echo "Submitted transaction & saved to file $txsFolder/$txid.tx"
+./clean-up.sh
 
-echo "Visit: "
+echo "Find out more on-chain: "
 if [[ "$NETWORK" == "mainnet" ]]; then
     echo "Transaction:  https://cardanoscan.io/transaction/$txid"
     echo "Address:      https://cardanoscan.io/address/$addr"
@@ -114,5 +138,6 @@ else
     echo "TokenPolicy:  https://testnet.cardanoscan.io/tokenPolicy/$pid"
 fi
 
-echo "Overriding utxo file with new txHash#txId"
+echo "Updated UTxO file ($txid#0)"
 echo "$txid#0" > $utxoFile
+echo "Successfully submitted transaction."
