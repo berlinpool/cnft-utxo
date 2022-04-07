@@ -23,14 +23,14 @@ if [[ -f "$utxoFile" ]]; then
     oref=$(cat $utxoFile)
 else
     echo "No UTxO file found: $utxoFile"
-    exit 1;
+    exit 1
 fi
 
 # Validate tn (token name) file exists
 tnFile=${INPUTS_DIR}/${NETWORK}/$2
 if [ ! -f "$tnFile" ]; then
     echo "No token name file found: $tnFile"
-    exit 1;
+    exit 1
 else
     tn=$(cat $tnFile)
 fi
@@ -39,14 +39,14 @@ fi
 addrFile=${INPUTS_DIR}/${NETWORK}/$3
 if [ ! -f "$addrFile" ]; then
     echo "No address file found: $addrFile"
-    exit 1;
+    exit 1
 fi
 
 # Validate signing file exists
 skeyFile=${INPUTS_DIR}/${NETWORK}/$4
 if [ ! -f "$skeyFile" ]; then
     echo "No signing file found: $skeyFile"
-    exit 1;
+    exit 1
 fi
 
 amt=1
