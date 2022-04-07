@@ -94,7 +94,7 @@ COPY --from=builder /tmp/nft/scripts/mint/clean-up.sh /usr/local/etc/clean-up.sh
 COPY --from=builder /tmp/nft/testnet/unit.json /usr/local/etc/unit.json
 
 ENTRYPOINT [ "/usr/local/etc/mint-token-cli.sh" ]
-CMD [ "/usr/local/etc/mint-token-cli.sh", "utxo", "tokenname", "payment.addr", "payment.skey" ]
+CMD [ "utxo", "tokenname", "payment.addr", "payment.skey" ]
 
 ENV SCRIPT_PATH=/usr/local/etc
 ENV INPUTS_DIR=/var/cardano/inputs
