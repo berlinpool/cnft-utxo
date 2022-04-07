@@ -58,6 +58,7 @@ Update the following files respectively to your needs:
 
 After creating the files for the respective network,
 
+Before running docker-run script, adjust the name of the node.
 run `./docker-run.sh <network>` to use the default setup or alternatively, provide a different volume path of your choice.
 
 This runs the mint script which will eventually output links
