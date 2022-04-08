@@ -40,18 +40,21 @@ RUN mkdir -p /etc/nix &&\
     echo "substituters = https://cache.nixos.org https://hydra.iohk.io" >> /etc/nix/nix.conf &&\
     echo "trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=" >> /etc/nix/nix.conf
 
-RUN mkdir -p /tmp/nft
-# the following prevent docker caching via github's versioning as the head changes
-ADD https://api.github.com/repos/william-wolff-io/nft-maker/git/refs/heads/master version.json
-RUN git clone https://github.com/william-wolff-io/nft-maker.git /tmp/nft/
 RUN git clone https://github.com/input-output-hk/plutus-apps.git /tmp/plutus-apps/
 WORKDIR /tmp/plutus-apps/
 # Git commit id must match cabal.project tag
 RUN git checkout $COMMIT_ID
 # Set PATH to include .nix_profile & cabal/bin path to run nix-shell & find binaries
 ENV PATH="$PATH:/nix/var/nix/profiles/default/bin:/usr/local/bin:/bin:/root/.cabal/bin"
-# Expensive command kept isolated to make use of docker cache
-# Update & Build binaries required for plutus & nft repository
+# Cache expensive command - builds all plutus dependencies
+RUN nix-shell
+
+WORKDIR /tmp
+# the following prevent docker caching via github's versioning as the head changes
+ADD https://api.github.com/repos/william-wolff-io/nft-maker/git/refs/heads/master version.json
+RUN git clone https://github.com/william-wolff-io/nft-maker.git /tmp/nft/
+# Build binaries required for plutus & nft repository
+WORKDIR /tmp/plutus-apps/
 RUN nix-shell --run 'cd /tmp/nft/ && cabal update && cabal install && cp $(which cardano-cli) /usr/local/bin/cardano-cli 2>&1'
 RUN /tmp/nft/scripts/build/build-nft-binaries-store.sh
 
@@ -80,7 +83,7 @@ ENTRYPOINT [ "/bin/bash" ]
 
 FROM ubuntu:20.04
 
-RUN apt-get update && apt-get install --no-install-recommends -y locales pkg-config patchelf vim ca-certificates jq && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install --no-install-recommends -y jq
 
 # Copy nix depdencies
 COPY --from=builder /tmp/nix-store/nix /nix
