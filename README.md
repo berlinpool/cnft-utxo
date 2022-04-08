@@ -74,6 +74,9 @@ There is no formatting/ templating etc.
 For image NFTs there is an option that is required to be passed when running this container in order
 to take advantage of the [NFT standard template](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0025/README.md#structure).
 
+If you use the helper `docker-run.sh` script you can just pass a second boolean argument to whether you want to use the CIP25 template or not.
+Alterntively, you can also set the environment variable USE_CIP25 to either `true` or `false`.
+
 ## Debugging
 
 The mint script outputs all its inputs. That should be primary help for finding errors. In addition any error coming from submitting transaction via the cardano-cli binary will also be printed to the console.
