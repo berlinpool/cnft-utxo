@@ -24,8 +24,8 @@ if [ -z "$3" ]
     metadataFile=$3
 fi
 
-# ETH_METADATA_STANDARD="{\"721\":{\"$(echo $policyid)\":{\"$(echo $tokenname)\":$(cat $metadataFile)}}}"
-METADATA="$(cat $metadataFile)"
+METADATA="{\"721\":{\"$(echo $policyid)\":{\"$(echo $tokenname)\":$(cat $metadataFile)}}}"
+# METADATA="$(cat $metadataFile)"
 
 if [ -z "$4" ]
   then
