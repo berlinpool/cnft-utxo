@@ -1,6 +1,7 @@
-# NFT Maker
+# UTxO based CNFT Maker
 
-The following repository allows to create Cardano NFTs on the Cardano Blockchain via a docker image that sets up all the required dependencies. Containers of the image run as executable by providing specific input files.
+The following repository allows to create *true* Cardano NFTs on the Cardano Blockchain via a docker image that sets up all the required dependencies. 
+Containers of the image run as executable by providing specific input files and require access to a fully synced Cardano node ipc.
 
 ## Requirements
 
