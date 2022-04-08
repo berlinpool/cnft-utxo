@@ -15,16 +15,16 @@ if [ -z "$1" ]; then
 fi
 
 if [[ $NETWORK == "mainnet" ]]; then
-	docker run -it --name nft --rm \
+	docker run -it --name cnft --rm \
 		-v relay1-ipc:/opt/cardano/ipc \
 		-v $(pwd)/inputs:/var/cardano/inputs \
 		-e NETWORK=$NETWORK \
-		psg/nft:latest
+		berlinpool/cnft-utxo:latest
 else
-	docker run -it --name nft-test --rm \
+	docker run -it --name cnft-test --rm \
 		-v test-relay-ipc:/opt/cardano/ipc \
 		-v $(pwd)/inputs:/var/cardano/inputs \
 		-e NETWORK=$NETWORK \
-		psg/nft:latest
+		berlinpool/cnft-utxo:latest
 fi
 

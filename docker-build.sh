@@ -7,4 +7,4 @@ if [ -z "$1" ]; then
     VERSION=$1
 fi
 
-docker build --label psg/nft -t psg/nft:$VERSION -t psg/nft:latest .
+docker build --label berlinpool/cnft-utxo -t berlinpool/cnft-utxo:$VERSION -t berlinpool/cnft-utxo:latest .
