@@ -66,6 +66,14 @@ This runs the mint script which will eventually output links
 to the respective transaction that you can open to monitor
 when the token was successfully minted onchain.
 
+## Metadata
+By default the provided metadata file is copied one-to-one and attached to the transaction.
+There is no formatting/ templating etc.
+
+### Image CNFTs
+For image NFTs there is an option that is required to be passed when running this container in order
+to take advantage of the [NFT standard template](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0025/README.md#structure).
+
 ## Debugging
 
 The mint script outputs all its inputs. That should be primary help for finding errors. In addition any error coming from submitting transaction via the cardano-cli binary will also be printed to the console.
