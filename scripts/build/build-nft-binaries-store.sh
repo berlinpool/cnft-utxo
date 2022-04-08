@@ -30,3 +30,5 @@ do
         cp $dep "$storePath$depPath/$(basename $dep)" || true
     done
 done
+
+exit $?

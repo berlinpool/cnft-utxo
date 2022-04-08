@@ -141,3 +141,4 @@ fi
 echo "Updated UTxO file ($txid#0)"
 echo "$txid#0" > $utxoFile
 echo "Successfully submitted transaction."
+exit $?
