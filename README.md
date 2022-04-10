@@ -26,6 +26,19 @@ Checkout repository and make sure you have docker installed on your machine.
 
 Run `./docker-build.sh`
 
+or adjust the parameters your way:
+
+```
+docker run -it \
+    --name cnft \
+    --rm \
+    -v node-ipc:/opt/cardano/ipc \
+    -v $(pwd)/inputs:/var/cardano/inputs \
+    -e NETWORK=$NETWORK \
+    -e USE_CIP25=(true|default: false)
+    berlinpool/cnft-utxo:latest
+```
+
 *You can provide a version number to the build script. The default is 1.0.0*
 
 The first time building this image takes a while, because the plutus dependencies are build and installed.
