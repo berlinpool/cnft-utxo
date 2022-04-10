@@ -1,4 +1,5 @@
-# UTxO based CNFT Maker
+r
+ea# UTxO based CNFT Maker
 
 The following repository allows to create *true* Cardano NFTs on the Cardano Blockchain via a docker image that sets up all the required dependencies. 
 Containers of the image run as executable by providing specific input files and require access to a fully synced Cardano node ipc.
@@ -7,6 +8,17 @@ Containers of the image run as executable by providing specific input files and 
 
 - running a fully synchronized cardano node for the respective network (mainnet|testnet)
 - docker
+- input files
+
+### Required Input Files
+
+Default input files paths can be changed
+by overriding INPUTS_DIR environment variable:
+- ./inputs/metadata.json (optional)
+- ./inputs/*network*/payment.addr
+- ./inputs/*network*/payment.skey
+- ./inputs/*network*/tokenname
+- ./inputs/*network*/utxo
 
 ## Usage
 
@@ -80,3 +92,17 @@ Alterntively, you can also set the environment variable USE_CIP25 to either `tru
 ## Debugging
 
 The mint script outputs all its inputs. That should be primary help for finding errors. In addition any error coming from submitting transaction via the cardano-cli binary will also be printed to the console.
+
+
+cardano-cli transaction build --alonzo-era --mainnet \
+--tx-in 050b20cd859c31aeb491ca9787e4df7312a3cddd415877fa06169d63573e8333#1 \
+--tx-in 258fcb7f6868e99c4c109d90deeb08b66e2b0b61184c139566b0f0cb0384833b#1 \
+--tx-in 5792ad4bb494ee8fab17496bb734a2418ea417474ca13cb7e965edd4f9ccfafc#0 \
+--tx-in 5792ad4bb494ee8fab17496bb734a2418ea417474ca13cb7e965edd4f9ccfafc#1 \
+--tx-in 69d145f246f0c4f3b71af10af5f010c1ebd27dc9f16416ccdeafcaa58b91baa0#1 \
+--tx-in 6d031153b7780181b53ffb67c26a623e4060ccef44c3725d2b39bdebdb50eaa9#1 \
+--tx-in 949099247ce7f9e6dadd3022cbd8867bf11b00c2d7079ccf69038df1db821c7c#1 \
+--tx-out "$(cat dest.addr) + 17674748 lovelace" \
+--change-address $(cat dest.addr) \
+--protocol-params-file protocol-parameters.json \
+--out-file tx.raw
