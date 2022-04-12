@@ -80,7 +80,7 @@ Use `./docker-start.sh (DOCKER ID| NAME)` to rerun an existing container and min
 ## Metadata
 By default the provided metadata file is copied one-to-one and attached to the transaction. There is no formatting/ templating etc.
 
-### CIP-0025 Stanard Image CNFTs
+### CIP-0025 Standard Image CNFTs
 For image NFTs there is an option that is required to be passed when running this container in order to take advantage of the [NFT standard template](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0025/README.md#structure).
 
 If you use the helper `docker-run.sh` script you can just pass a second boolean argument to whether you want to use the CIP25 template or not.
