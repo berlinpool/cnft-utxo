@@ -32,7 +32,8 @@ Check the node's sync status with:
 
 ### Input Files
 
-Default input files paths can be changed by overriding `INPUTS_DIR` environment variable or by pointing your volume to a different directory:
+The default input files paths that is used inside the docker helper scripts
+is this repo's `./inputs` directory. So either place all of the following files in that repository or use the docker volume to point to a different location.
 
 - `payment.addr`
 - `payment.skey`
