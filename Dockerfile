@@ -101,5 +101,6 @@ ENTRYPOINT [ "/usr/local/etc/mint-token-cli.sh" ]
 CMD [ "utxo", "tokenname", "payment.addr", "payment.skey" ]
 
 ENV SCRIPT_PATH=/usr/local/etc
+ENV INPUTS_DIR=/var/cardano/inputs
 ENV NETWORK=mainnet
 ENV CARDANO_NODE_SOCKET_PATH=/opt/cardano/ipc/node.socket

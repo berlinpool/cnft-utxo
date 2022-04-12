@@ -18,7 +18,7 @@ fi
 echo "Network: $NETWORK"
 
 # Validate UTxO file exists
-utxoFile=$1
+utxoFile=${INPUTS_DIR}/$1
 if [[ -f "$utxoFile" ]]; then
     oref=$(cat $utxoFile)
 else
@@ -27,7 +27,7 @@ else
 fi
 
 # Validate tn (token name) file exists
-tnFile=$2
+tnFile=${INPUTS_DIR}/$2
 if [ ! -f "$tnFile" ]; then
     echo "No token name file found: $tnFile"
     exit 1
@@ -36,14 +36,14 @@ else
 fi
 
 # Validate Address file exists
-addrFile=$3
+addrFile=${INPUTS_DIR}/$3
 if [ ! -f "$addrFile" ]; then
     echo "No address file found: $addrFile"
     exit 1
 fi
 
 # Validate signing file exists
-skeyFile=$4
+skeyFile=${INPUTS_DIR}/$4
 if [ ! -f "$skeyFile" ]; then
     echo "No signing file found: $skeyFile"
     exit 1
@@ -56,10 +56,10 @@ echo "token name: $tn"
 echo "address file: $addrFile"
 
 # Setup directory to backup policy scripts inside inputs volume
-txsFolder=txs
+txsFolder=${INPUTS_DIR}/txs
 mkdir -p $txsFolder
 
-policyFolder=policies
+policyFolder=${INPUTS_DIR}/policies
 mkdir -p $policyFolder
 ppFile=/tmp/protocol-parameters.json
 
@@ -76,7 +76,7 @@ cp ./${policyFile} ${policyFolder}/${pid}.${tnHex}.plutus
 echo "Generated policy file ${policyFolder}/${pid}.${tnHex}.plutus"
 addr=$(cat $addrFile)
 v="$amt $pid.$tnHex"
-in_metadataFile=metadata.json
+in_metadataFile=${INPUTS_DIR}/metadata.json
 out_metadataFile=/tmp/metadata_out.json
 
 # Query for current protocol parameters in respect to network
@@ -125,7 +125,7 @@ txid=$(cardano-cli transaction txid --tx-file $signedFile)
 
 echo $tx > ${txsFolder}/${txid}.tx
 echo "Submitted transaction & saved to file $txsFolder/$txid.tx"
-rm -rf $unsignedFile $signedFile $ppFile $out_metadataFile
+rm -rf /tmp/tx.unsigned /tmp/tx.signed /tmp/protocol-parameters.json /tmp/metadata_out.json
 
 echo "Find out more on-chain: "
 if [[ "$NETWORK" == "mainnet" ]]; then

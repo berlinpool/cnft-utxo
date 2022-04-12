@@ -26,14 +26,14 @@ if [[ $NETWORK == "mainnet" ]]; then
 		-v relay1-ipc:/opt/cardano/ipc \
 		-v $(pwd)/inputs:/var/cardano/inputs \
 		-e NETWORK=$NETWORK \
-		-e USE_CIP25=$USE_CIP25
+		-e USE_CIP25=$USE_CIP25 \
 		berlinpool/cnft-utxo:latest
 else
 	docker run -it --name cnft-test --rm \
 		-v test-relay-ipc:/opt/cardano/ipc \
 		-v $(pwd)/inputs:/var/cardano/inputs \
 		-e NETWORK=$NETWORK \
-		-e USE_CIP25=$USE_CIP25
+		-e USE_CIP25=$USE_CIP25 \
 		berlinpool/cnft-utxo:latest
 fi
 
