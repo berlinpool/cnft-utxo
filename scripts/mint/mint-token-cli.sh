@@ -83,7 +83,7 @@ out_metadataFile=/tmp/metadata_out.json
 cardano-cli query protocol-parameters $MAGIC --out-file $ppFile
 
 if [ -f "$in_metadataFile" ]; then
-    sh ./create-metadata.sh $pid $tn $in_metadataFile $out_metadataFile
+    /usr/local/etc/create-metadata.sh $pid $tn $in_metadataFile $out_metadataFile
     cardano-cli transaction build \
         $MAGIC \
         --tx-in $oref \
@@ -125,7 +125,7 @@ txid=$(cardano-cli transaction txid --tx-file $signedFile)
 
 echo $tx > ${txsFolder}/${txid}.tx
 echo "Submitted transaction & saved to file $txsFolder/$txid.tx"
-rm -rf /tmp/tx.unsigned /tmp/tx.signed /tmp/protocol-parameters.json /tmp/metadata_out.json
+rm -rf $unsignedFile $signedFile $ppFile $out_metadataFile
 
 echo "Find out more on-chain: "
 if [[ "$NETWORK" == "mainnet" ]]; then

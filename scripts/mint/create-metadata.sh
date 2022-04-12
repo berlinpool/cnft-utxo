@@ -25,12 +25,11 @@ if [ -z "$3" ]
 fi
 
 if [[ "$USE_CIP25" == "true" ]]; then
-    # use CIP25 metadata standard
-    METADATA="{\"721\":{\"$(echo $policyid)\":{\"$(echo $tokenname)\":$(cat $metadataFile)}}}"
-  else
-    METADATA="$(cat $metadataFile)"
+  # use CIP25 metadata standard
+  METADATA="{\"721\":{\"$(echo $policyid)\":{\"$(echo $tokenname)\":$(cat $metadataFile)}}}"
+else
+  METADATA="$(cat $metadataFile)"
 fi
-
 
 if [ -z "$4" ]
   then
